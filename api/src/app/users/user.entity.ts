@@ -17,9 +17,10 @@ export class User {
   @Column()
   passwordHash!: string;
 
+  // One user can have multiple memberships in different organizations
   @OneToMany(
-    () => UserOrganization,
-    (uo) => uo.user
+    () => UserOrganization, // Tells ORM what entity is on the many side
+    (uo) => uo.user // Tells ORM which property on the other entity is the reference back to this entity
   )
   memberships!: UserOrganization[];
 }
