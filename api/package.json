@@ -79,6 +79,13 @@
         "options": {
           "passWithNoTests": true
         }
+      },
+      "seed": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "ts-node src/seed.ts",
+          "cwd": "api"
+        }
       }
     }
   },
