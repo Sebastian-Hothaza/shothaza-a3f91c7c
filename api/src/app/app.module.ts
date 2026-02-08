@@ -4,8 +4,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TasksModule } from './tasks/tasks.module';
 import { UsersModule } from './users/users.module';
-import { OrganizationModule } from './organizations/organization.module';
+import { OrganizationsModule } from './organizations/organization.module';
 import { UserOrganizationModule } from './user-organizations/user-organization.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,8 +23,9 @@ import { UserOrganizationModule } from './user-organizations/user-organization.m
     }),
     TasksModule,
     UsersModule,
-    OrganizationModule,
+    OrganizationsModule,
     UserOrganizationModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
