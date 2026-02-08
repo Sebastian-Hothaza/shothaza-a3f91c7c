@@ -56,6 +56,13 @@ async function seed() {
   });
   await userRepo.save(bob);
 
+  const outsider = userRepo.create({
+    name: 'outsider',
+    email: 'outsider@gmail.com',
+    passwordHash,
+  });
+  await userRepo.save(outsider);
+
   // Memberships
   await uoRepo.save([
     uoRepo.create({
