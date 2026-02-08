@@ -1,10 +1,5 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, } from 'typeorm';
+import { Task } from '../tasks/task.entity';
 
 @Entity()
 export class Organization {
@@ -14,16 +9,14 @@ export class Organization {
   @Column()
   name!: string;
 
-  @ManyToOne(
-    () => Organization,
-    (org) => org.children,
-    { nullable: true }
-  )
+  // Many children will just have one parent
+  @ManyToOne(() => Organization, (org) => org.children, { nullable: true })
   parent?: Organization;
 
-  @OneToMany(
-    () => Organization,
-    (org) => org.parent
-  )
+  // One org can have many children
+  @OneToMany(() => Organization, (org) => org.parent)
   children!: Organization[];
+
+  @OneToMany(() => Task, (task) => task.organization)
+  tasks!: Task[];
 }

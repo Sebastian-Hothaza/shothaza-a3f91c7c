@@ -1,9 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  Column,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Organization } from '../organizations/organization.entity';
 import { Role } from './role.enum';
@@ -19,9 +14,6 @@ export class UserOrganization {
   @ManyToOne(() => Organization)
   organization!: Organization;
 
-  @Column({
-    type: 'enum',
-    enum: Role,
-  })
+  @Column({ type: 'enum', enum: Role })
   role!: Role;
 }
