@@ -15,6 +15,9 @@ export class User {
   name!: string;
 
   @Column()
+  email!: string;
+
+  @Column()
   passwordHash!: string;
 
   // One user can have multiple memberships in different organizations
