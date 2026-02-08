@@ -15,8 +15,9 @@ export class TasksController {
 
     // Only admins & owners can create tasks. Task's org MUST match users org OR in case where user is member of parent company, allow generate in child company
     @Post()
-    create(@Body('title') title: string, @Body('category') category: string, @Body('organizationId') organizationId: number) {
-        return this.tasksService.create(title, category, organizationId);
+    @Roles(Role.ADMIN)
+    create(@Body('title') title: string, @Body('category') category: string, @Body('organizationId') organizationId: number, @Req() req: Request & { user?: any }) {
+        return this.tasksService.create(title, category, organizationId, req.user);
     }
 
     // List tasks, if in parent company, then list those in child company
@@ -29,12 +30,14 @@ export class TasksController {
 
     // Same as create
     @Put(':id')
+    @Roles(Role.ADMIN)
     update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
         return this.tasksService.update(Number(id), updateTaskDto);
     }
 
     // Only owner can do this
     @Delete(':id')
+    @Roles(Role.OWNER)
     delete(@Param('id') id: string) {
         return this.tasksService.delete(Number(id));
     }

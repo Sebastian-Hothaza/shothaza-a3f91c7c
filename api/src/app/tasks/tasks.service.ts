@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Task } from './task.entity';
@@ -17,10 +17,24 @@ export class TasksService {
         private organizationsService: OrganizationService,
     ) { }
 
-    async create(title: string, category: string, organizationId: number) {
+    async create(title: string, category: string, organizationId: number, user: JwtUser) {
         const org = await this.orgRepo.findOne({ where: { id: organizationId } });
         if (!org) throw new Error('Organization not found');
 
+        // Build a set of org IDs the user can access
+        const accessibleOrgIds = new Set<number>();
+
+        for (const membership of user.memberships) {
+            const orgAndDescendants = await this.organizationsService.getOrgAndDescendants(membership.organizationId);
+            orgAndDescendants.forEach((id) => accessibleOrgIds.add(id));
+        }
+
+        // Check if user is allowed to create in this org
+        if (!accessibleOrgIds.has(organizationId)) {
+            throw new ForbiddenException('You do not have permission to create a task in this organization');
+        }
+
+        // Create the task
         const task = this.repo.create({
             title,
             category,
@@ -30,10 +44,6 @@ export class TasksService {
         return this.repo.save(task);
     }
 
-    findOne(id: number) {
-        return this.repo.findOneBy({ id });
-    }
-
     update(id: number, updateTaskDto: Partial<Task>) {
         return this.repo.update(id, updateTaskDto);
     }
@@ -41,7 +51,7 @@ export class TasksService {
 
     async findAll(user: JwtUser) {
         const orgIds = new Set<number>();
-        
+
         for (const membership of user.memberships) {
             const accessibleOrgIds = await this.organizationsService.getOrgAndDescendants(membership.organizationId);
             accessibleOrgIds.forEach((id) => orgIds.add(id));
