@@ -1,5 +1,5 @@
-import { UnauthorizedException } from '@nestjs/common';
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Res, UnauthorizedException } from '@nestjs/common';
+import type { Response } from 'express'
 import { AuthService } from './auth.service'
 
 
@@ -9,9 +9,21 @@ export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
     @Post('login')
-    async login(@Body() body: { email: string; password: string }) {
+    async login(
+        @Body() body: { email: string; password: string },
+        @Res({ passthrough: true }) res: Response,
+    ) {
         const user = await this.authService.validateUser(body.email, body.password); // First service call to make sure user login credentials are accurate
         if (!user) throw new UnauthorizedException('Invalid credentials');
-        return this.authService.login(user); // Second service call to actually generate the JWT
+        const { accessToken } = this.authService.login(user);
+
+        res.cookie('access_token', accessToken, {
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: false, // true in prod
+            maxAge: 60 * 60 * 1000,
+        });
+
+        return { success: true };
     }
 }
