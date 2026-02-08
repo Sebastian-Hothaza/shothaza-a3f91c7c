@@ -5,7 +5,7 @@ import { User } from './app/users/user.entity';
 import { Organization } from './app/organizations/organization.entity';
 import { UserOrganization } from './app/user-organizations/user-organization.entity';
 import { Task } from './app/tasks/task.entity';
-import { Role } from './app/user-organizations/role.enum';
+import { Role } from './app/auth/role.enum';
 import * as bcrypt from 'bcrypt';
 
 
