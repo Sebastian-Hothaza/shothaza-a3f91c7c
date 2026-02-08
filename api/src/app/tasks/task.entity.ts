@@ -8,6 +8,9 @@ export class Task {
   @Column()
   title!: string;
 
+  @Column()
+  category!: string;
+
   @Column({ default: false })
   completed!: boolean;
 }
