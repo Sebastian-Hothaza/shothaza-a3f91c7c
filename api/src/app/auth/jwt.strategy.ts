@@ -23,18 +23,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         const user = await this.usersRepo.findOne({
             where: { id: payload.sub },
             relations: {
-                memberships: true,
+                memberships: {
+                    organization: true
+                }
             },
         });
 
         if (!user) throw new UnauthorizedException('User no longer exists');
 
-
         return {
             id: user.id,
             email: user.email,
             memberships: user.memberships.map((m) => ({
-                organizationId: m.organization,
+                organizationId: m.organization.id,
                 role: m.role,
             })),
         };
