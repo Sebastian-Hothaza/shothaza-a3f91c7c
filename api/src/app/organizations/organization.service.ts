@@ -22,4 +22,20 @@ export class OrganizationService {
         }
         return ids;
     }
+
+    // Returns the id of the provided org as well as the id's of parent orgs
+    async getOrgAndDescendants(orgId: number): Promise<number[]> {
+        const ids: number[] = [orgId];
+
+        const children = await this.orgRepo.find({
+            where: { parent: { id: orgId } },
+        });
+
+        for (const child of children) {
+            ids.push(child.id);
+        }
+
+        return ids;
+    }
+
 }
