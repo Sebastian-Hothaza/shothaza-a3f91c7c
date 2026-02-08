@@ -31,8 +31,8 @@ export class TasksController {
     // Same as create
     @Put(':id')
     @Roles(Role.ADMIN)
-    update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-        return this.tasksService.update(Number(id), updateTaskDto);
+    update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @Req() req: Request & { user?: any }) {
+        return this.tasksService.update(Number(id), updateTaskDto, req.user);
     }
 
     // Only owner can do this

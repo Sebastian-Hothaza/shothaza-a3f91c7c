@@ -23,7 +23,6 @@ export class TasksService {
 
         // Build a set of org IDs the user can access
         const accessibleOrgIds = new Set<number>();
-
         for (const membership of user.memberships) {
             const orgAndDescendants = await this.organizationsService.getOrgAndDescendants(membership.organizationId);
             orgAndDescendants.forEach((id) => accessibleOrgIds.add(id));
@@ -44,7 +43,20 @@ export class TasksService {
         return this.repo.save(task);
     }
 
-    update(id: number, updateTaskDto: Partial<Task>) {
+    async update(id: number, updateTaskDto: Partial<Task>, user: JwtUser) {
+        // Build a set of org IDs the user can access for editing
+        const accessibleOrgIds = new Set<number>();
+        for (const membership of user.memberships) {
+            const orgAndDescendants = await this.organizationsService.getOrgAndDescendants(membership.organizationId);
+            orgAndDescendants.forEach((id) => accessibleOrgIds.add(id));
+        }
+
+        // Check if user is allowed to create in this org
+        if (!accessibleOrgIds.has(id)) {
+            throw new ForbiddenException('You do not have permission to edit a task in this organization');
+        }
+
+        // Update the task
         return this.repo.update(id, updateTaskDto);
     }
 
@@ -53,8 +65,8 @@ export class TasksService {
         const orgIds = new Set<number>();
 
         for (const membership of user.memberships) {
-            const accessibleOrgIds = await this.organizationsService.getOrgAndDescendants(membership.organizationId);
-            accessibleOrgIds.forEach((id) => orgIds.add(id));
+            const orgAndDescendants = await this.organizationsService.getOrgAndDescendants(membership.organizationId);
+            orgAndDescendants.forEach((id) => orgIds.add(id));
         }
 
         return this.repo.find({ where: { organization: In([...orgIds]) } });
