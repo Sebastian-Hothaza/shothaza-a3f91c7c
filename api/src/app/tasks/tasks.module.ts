@@ -5,10 +5,11 @@ import { TasksController } from './tasks.controller';
 import { Task } from './task.entity';
 import { UserOrganization } from '../user-organizations/user-organization.entity';
 import { Organization } from '../organizations/organization.entity';
+import { OrganizationService } from '../organizations/organization.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Task]), TypeOrmModule.forFeature([UserOrganization]), TypeOrmModule.forFeature([Organization])],
-  providers: [TasksService],
+  providers: [TasksService, OrganizationService],
   controllers: [TasksController],
 })
 export class TasksModule { }
