@@ -5,6 +5,9 @@ import { User } from './app/users/user.entity';
 import { Organization } from './app/organizations/organization.entity';
 import { UserOrganization } from './app/user-organizations/user-organization.entity';
 import { Role } from './app/user-organizations/role.enum';
+import * as bcrypt from 'bcrypt';
+
+
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -35,15 +38,18 @@ async function seed() {
   await orgRepo.save(childOrg);
 
   // Users
+  const passwordHash = await bcrypt.hash('password123', 10);
   const alice = userRepo.create({
     name: 'Alice',
-    passwordHash: 'hashed-password',
+    email: 'alice@gmail.com',
+    passwordHash,
   });
   await userRepo.save(alice);
 
   const bob = userRepo.create({
     name: 'Bob',
-    passwordHash: 'hashed-password',
+    email: 'bob@gmail.com',
+    passwordHash,
   });
   await userRepo.save(bob);
 
