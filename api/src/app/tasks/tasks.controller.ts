@@ -1,6 +1,9 @@
 import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { UpdateTaskDto } from './task-update.dto';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
 
 @Controller('tasks')
 export class TasksController {
@@ -11,6 +14,7 @@ export class TasksController {
         return this.tasksService.create(title, category);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get()
     findAll() {
         return this.tasksService.findAll();
