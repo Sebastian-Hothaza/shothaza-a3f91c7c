@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Task } from './task.entity';
 import { Organization } from '../organizations/organization.entity';
+import { JwtUser } from '../auth/jwt-user.interface';
+import { OrganizationService } from '../organizations/organization.service';
+
 
 @Injectable()
 export class TasksService {
@@ -11,6 +14,7 @@ export class TasksService {
         private repo: Repository<Task>,
         @InjectRepository(Organization)
         private orgRepo: Repository<Organization>,
+        private organizationsService: OrganizationService,
     ) { }
 
     async create(title: string, category: string, organizationId: number) {
@@ -35,8 +39,15 @@ export class TasksService {
     }
 
 
-    findAll() {
-        return this.repo.find();
+    async findAll(user: JwtUser) {
+        const orgIds = new Set<number>();
+        
+        for (const membership of user.memberships) {
+            const accessibleOrgIds = await this.organizationsService.getOrgAndDescendants(membership.organizationId);
+            accessibleOrgIds.forEach((id) => orgIds.add(id));
+        }
+
+        return this.repo.find({ where: { organization: In([...orgIds]) } });
     }
 
     delete(id: number) {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Req } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { UpdateTaskDto } from './task-update.dto';
 import { UseGuards } from '@nestjs/common';
@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RbacGuard } from '../auth/rbac.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/role.enum';
+
 
 @UseGuards(JwtAuthGuard, RbacGuard) // As per assignment spec, ALL endpoints must invlude token verification
 @Controller('tasks')
@@ -19,10 +20,10 @@ export class TasksController {
     }
 
     // List tasks, if in parent company, then list those in child company
-    @Roles(Role.VIEWER) // Note about guard: Answers "Can this endpoint be called at all?" NOT data scoping or data shaping
     @Get()
-    findAll() {
-        return this.tasksService.findAll();
+    @Roles(Role.VIEWER) // Note about guard: Answers "Can this endpoint be called at all?" NOT data scoping or data shaping
+    findAll(@Req() req: Request & { user?: any }) {
+        return this.tasksService.findAll(req.user);
     }
 
 
