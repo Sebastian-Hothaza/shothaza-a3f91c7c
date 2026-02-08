@@ -7,8 +7,8 @@ export class TasksController {
     constructor(private readonly tasksService: TasksService) { }
 
     @Post()
-    create(@Body('title') title: string) {
-        return this.tasksService.create(title);
+    create(@Body('title') title: string, @Body('category') category: string) {
+        return this.tasksService.create(title, category);
     }
 
     @Get()

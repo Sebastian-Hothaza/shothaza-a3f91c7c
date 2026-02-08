@@ -10,8 +10,8 @@ export class TasksService {
         private repo: Repository<Task>,
     ) { }
 
-    create(title: string) {
-        const task = this.repo.create({ title });
+    create(title: string, category: string) {
+        const task = this.repo.create({ title, category });
         return this.repo.save(task);
     }
 
