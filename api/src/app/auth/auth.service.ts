@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/user.entity';
 
 
@@ -13,14 +14,21 @@ export class AuthService {
     constructor(
         @InjectRepository(User)
         private usersRepo: Repository<User>,
+        private readonly jwtService: JwtService,
     ) { }
 
-    
+
 
     // Given a valid user, issues a JWT
     login(user: User) {
-        console.log(`User ${user.name} has logged in`);
-        // TODO: JWT
+        const payload = {
+            sub: user.id,
+            email: user.email,
+        };
+
+        const accessToken = this.jwtService.sign(payload);
+
+        return {accessToken};
     }
 
 
