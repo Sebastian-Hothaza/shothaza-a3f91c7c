@@ -5,12 +5,17 @@ import { Role, RoleRank } from './role.enum';
 import { Request } from 'express';
 import { OrganizationService } from '../organizations/organization.service';
 import { JwtUser } from './jwt-user.interface';
+import { Repository } from 'typeorm';
+import { Task } from '../tasks/task.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class RbacGuard implements CanActivate {
     constructor(
         private reflector: Reflector,
         private organizationsService: OrganizationService,
+        @InjectRepository(Task)
+        private readonly taskRepo: Repository<Task>
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -19,25 +24,33 @@ export class RbacGuard implements CanActivate {
             [context.getHandler(), context.getClass()],
         );
 
+
         // If no roles required, shortcut to allow
         if (!requiredRoles || requiredRoles.length === 0) return true;
 
 
-        // Check for valid user
+        // Check for valid user and task(if provided)
         const request = context.switchToHttp().getRequest<Request>();
-
-
         const user = request.user as JwtUser;
+        const taskId = request.params?.id;
+
         if (!user || !user.memberships) throw new ForbiddenException('No user or memberships found');
 
-        // Determine target organization
-        const organizationId = request.body?.organizationId || request.params?.organizationId;
-        
-        // If no org context, this is a non-org-scoped route (e.g. GET /tasks)
-        // Let the request through — data scoping happens in the service
-        if (!organizationId) {
+        // Determine taskID
+
+        let organizationId = request.body?.organizationId || request.params?.organizationId;
+
+        if (!organizationId && taskId) {
+            const task = await this.taskRepo.findOne({
+                where: { id: Number(taskId) },
+                relations: ['organization'], // <-- load the organization entity
+            });
+            if (!task) throw new ForbiddenException('Task not found');
+            organizationId = task.organization.id;
+        } else {
             return true;
         }
+
 
 
         // Get all ancestor org IDs (including self)
