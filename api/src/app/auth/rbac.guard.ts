@@ -1,17 +1,16 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserOrganization } from '../user-organizations/user-organization.entity';
-import { Role, RoleRank } from '../user-organizations/role.enum';
 import { ROLES_KEY } from './roles.decorator';
+import { Role, RoleRank } from './role.enum';
+import { Request } from 'express';
+import { OrganizationService } from '../organizations/organization.service';
+import { JwtUser } from './jwt-user.interface';
 
 @Injectable()
 export class RbacGuard implements CanActivate {
     constructor(
         private reflector: Reflector,
-        @InjectRepository(UserOrganization)
-        private userOrgRepo: Repository<UserOrganization>,
+        private organizationsService: OrganizationService,
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -20,55 +19,49 @@ export class RbacGuard implements CanActivate {
             [context.getHandler(), context.getClass()],
         );
 
-        if (!requiredRoles) {
-            return true; // no RBAC required
+        // If no roles required, shortcut to allow
+        if (!requiredRoles || requiredRoles.length === 0) return true;
+
+
+        // Check for valid user
+        const request = context.switchToHttp().getRequest<Request>();
+
+
+        const user = request.user as JwtUser;
+        if (!user || !user.memberships) throw new ForbiddenException('No user or memberships found');
+
+        // Determine target organization
+        const organizationId = request.body?.organizationId || request.params?.organizationId;
+        
+        // If no org context, this is a non-org-scoped route (e.g. GET /tasks)
+        // Let the request through — data scoping happens in the service
+        if (!organizationId) {
+            return true;
         }
 
-        const request = context.switchToHttp().getRequest();
-        const userId = request.user.userId;
 
-        const orgId =
-            Number(request.params.orgId) ??
-            Number(request.body.orgId);
+        // Get all ancestor org IDs (including self)
+        const allowedOrgIds = await this.organizationsService.getOrgAndAncestors(organizationId);
 
-        if (!orgId) {
-            throw new ForbiddenException('Organization not specified');
-        }
-
-        // Load memberships
-        const memberships = await this.userOrgRepo.find({
-            where: { user: { id: userId } },
-            relations: ['organization', 'organization.parent'],
-        });
-
-        // Resolve effective role
-        let effectiveRole: Role | null = null;
-
-        for (const m of memberships) {
-            if (
-                m.organization.id === orgId ||
-                m.organization.parent?.id === orgId
-            ) {
-                if (
-                    !effectiveRole ||
-                    RoleRank[m.role] > RoleRank[effectiveRole]
-                ) {
-                    effectiveRole = m.role;
+        // Find highest role user has across allowed orgs
+        let highestRole: Role | null = null;
+        for (const membership of user.memberships) {
+            if (allowedOrgIds.includes(membership.organizationId)) {
+                if (!highestRole || RoleRank[membership.role] > RoleRank[highestRole]) {
+                    highestRole = membership.role;
                 }
             }
         }
 
-        if (!effectiveRole) {
-            throw new ForbiddenException('No access to organization');
-        }
+        if (!highestRole) throw new ForbiddenException('No access to this organization');
 
+        // Check if role satisfies any required role
         const allowed = requiredRoles.some(
-            (r) => RoleRank[effectiveRole!] >= RoleRank[r],
+            (requiredRole) =>
+                RoleRank[highestRole!] >= RoleRank[requiredRole],
         );
 
-        if (!allowed) {
-            throw new ForbiddenException('Insufficient role');
-        }
+        if (!allowed) throw new ForbiddenException('Insufficient role');
 
         return true;
     }
