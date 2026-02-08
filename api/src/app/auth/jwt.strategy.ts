@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor() {
+    constructor(
+        @InjectRepository(User)
+        private readonly usersRepo: Repository<User>,
+    ) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
                 (req) => req?.cookies?.access_token,
@@ -13,11 +19,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: any) {
-        // Whatever you return here becomes req.user.
+    async validate(payload: { sub: number; email: string }) {
+        const user = await this.usersRepo.findOne({
+            where: { id: payload.sub },
+            relations: {
+                memberships: true,
+            },
+        });
+
+        if (!user) throw new UnauthorizedException('User no longer exists');
+
+
         return {
-            userId: payload.sub,
-            email: payload.email,
+            id: user.id,
+            email: user.email,
+            memberships: user.memberships.map((m) => ({
+                organizationId: m.organization,
+                role: m.role,
+            })),
         };
     }
 }
