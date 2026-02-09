@@ -49,7 +49,14 @@ export class AuthService {
   }
 
   logout() {
-    this.loggedIn$.next(false);
-    this.router.navigate(['/login']);
+    return this.http
+      .post(`${this.API_URL}/logout`, {}, { withCredentials: true })
+      .pipe(
+        tap(() => {
+          this.loggedIn$.next(false);
+          this.router.navigate(['/login']);
+        }),
+      );
   }
+
 }
