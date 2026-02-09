@@ -36,7 +36,7 @@ describe('TasksController', () => {
     expect(controller).toBeDefined();
   });
 
-  
+
   describe('findAll', () => {
     it('should call service.findAll with the user', async () => {
       const user = { id: 1, memberships: [] };
@@ -85,11 +85,14 @@ describe('TasksController', () => {
 
   describe('delete', () => {
     it('should call service.delete with correct id', async () => {
+      const user = { id: 1, memberships: [] };
+      const req: any = { user };
+
       mockTasksService.delete.mockResolvedValue({ affected: 1 });
-      const result = await controller.delete('1');
+      const result = await controller.delete('1', req);
       expect(result).toEqual({ affected: 1 });
-      expect(mockTasksService.delete).toHaveBeenCalledWith(1);
+      expect(mockTasksService.delete).toHaveBeenCalledWith(1, user);
     });
   });
-  
+
 });

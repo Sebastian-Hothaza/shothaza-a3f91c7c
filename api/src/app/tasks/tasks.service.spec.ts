@@ -5,6 +5,7 @@ import { OrganizationService } from '../organizations/organization.service';
 import { JwtUser } from '../auth/jwt-user.interface';
 import { ForbiddenException } from '@nestjs/common';
 import { Role } from '../auth/role.enum';
+import { LogService } from '../logs/log.service';
 
 // Helper to mock a TypeORM repository
 const mockRepository = () => ({
@@ -15,6 +16,12 @@ const mockRepository = () => ({
   find: jest.fn(),
   delete: jest.fn(),
 });
+
+const mockLogService = {
+  create: jest.fn(),
+};
+
+
 
 describe('TasksService', () => {
   let service: TasksService;
@@ -29,6 +36,7 @@ describe('TasksService', () => {
         { provide: 'TaskRepository', useFactory: mockRepository },
         { provide: 'OrganizationRepository', useFactory: mockRepository },
         { provide: OrganizationService, useValue: { getOrgAndDescendants: jest.fn() } },
+        { provide: LogService, useValue: mockLogService}
       ],
     })
       // Override the injected repositories
@@ -106,11 +114,15 @@ describe('TasksService', () => {
   });
 
   describe('delete', () => {
-    it('should delete a task', async () => {
+    it('should delete a task if user is OWNER', async () => {
+      const user: JwtUser = { id: 1, memberships: [{ organizationId: 1, role: Role.OWNER }] };
+
       taskRepo.delete.mockResolvedValue({ affected: 1 });
-      const result = await service.delete(1);
+      const result = await service.delete(1, user);
       expect(result).toEqual({ affected: 1 });
       expect(taskRepo.delete).toHaveBeenCalledWith(1);
     });
   });
+  
+  
 });
