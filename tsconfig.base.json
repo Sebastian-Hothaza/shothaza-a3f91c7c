@@ -2,7 +2,6 @@
 // Every projetcs TSConfig extends this file
 {
   "compilerOptions": {
-    "declarationMap": true,
     "importHelpers": true,
     "isolatedModules": true,
     "lib": ["dom", "es2022"],
