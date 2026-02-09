@@ -27,15 +27,22 @@ export class AuthController {
         });
 
         return { success: true };
- 
+
     }
 
     @Get('me')
     @UseGuards(JwtAuthGuard)
-    me( @Req() req: Request & { user?: any }){
-        return{
+    me(@Req() req: Request & { user?: any }) {
+        return {
             id: req.user.id,
             email: req.user.email
         };
     }
+
+    @Post('logout')
+    logout(@Res({ passthrough: true }) res: Response) {
+        res.clearCookie('access_token');
+        return { success: true };
+    }
+
 }
