@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Req } from '@nestjs/common';
+import { UseGuards, ForbiddenException, Controller, Get, Post, Put, Delete, Body, Param, Req } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { UpdateTaskDto } from './task-update.dto';
-import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RbacGuard } from '../auth/rbac.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -16,8 +15,10 @@ export class TasksController {
     // Only admins & owners can create tasks. Task's org MUST match users org OR in case where user is member of parent company, allow generate in child company
     @Post()
     @Roles(Role.ADMIN)
-    create(@Body('title') title: string, @Body('category') category: string, @Body('organizationId') organizationId: number, @Req() req: Request & { user?: any }) {
-        return this.tasksService.create(title, category, organizationId, req.user);
+    create(@Body('title') title: string, @Body('category') category: string, @Req() req: Request & { user?: any }) {
+        const orgId = req.user.memberships?.[0]?.organizationId;
+        if (!orgId) { throw new ForbiddenException('User has no organization'); }
+        return this.tasksService.create(title, category, orgId, req.user);
     }
 
     // List tasks, if in parent company, then list those in child company
