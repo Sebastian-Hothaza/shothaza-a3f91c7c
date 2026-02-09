@@ -1,6 +1,8 @@
-import { Controller, Post, Body, Res, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, UnauthorizedException, Get } from '@nestjs/common';
 import type { Response } from 'express'
 import { AuthService } from './auth.service'
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 
 // The controller needs to handle the HTTP request. Service only handles business logic
@@ -20,10 +22,20 @@ export class AuthController {
         res.cookie('access_token', accessToken, {
             httpOnly: true,
             sameSite: 'lax',
-            secure: false, // true in prod
+            secure: false, // needs to be false to allow over HTTP, in prod wil be true
             maxAge: 60 * 60 * 1000,
         });
 
         return { success: true };
+ 
+    }
+
+    @Get('me')
+    @UseGuards(JwtAuthGuard)
+    me( @Req() req: Request & { user?: any }){
+        return{
+            id: req.user.id,
+            email: req.user.email
+        };
     }
 }
