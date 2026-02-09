@@ -1,11 +1,11 @@
+// ROOT CONFIG FOR ENTIRE MONOREPO
+// Every projetcs TSConfig extends this file
 {
   "compilerOptions": {
-    "composite": true,
     "declarationMap": true,
-    "emitDeclarationOnly": true,
     "importHelpers": true,
     "isolatedModules": true,
-    "lib": ["es2022"],
+    "lib": ["dom", "es2022"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "noEmitOnError": true,
