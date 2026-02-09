@@ -13,7 +13,5 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "composite": true,
-    "emitDeclarationOnly": true,
   }
 }
