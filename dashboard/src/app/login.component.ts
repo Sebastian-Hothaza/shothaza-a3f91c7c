@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from './auth';
 
 @Component({
   standalone: true,
@@ -38,6 +40,11 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
           />
         </div>
 
+        <div *ngIf="error" class="text-red-600 text-sm">
+          {{ error }}
+        </div>
+
+
         <button
           type="submit"
           [disabled]="form.invalid"
@@ -52,19 +59,33 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 })
 export class LoginComponent {
-  form;
-  constructor(private fb: FormBuilder) {
+  error: string | null = null;
+  form!: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+  ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
     });
   }
+
   onSubmit() {
     if (this.form.invalid) return;
 
     const { email, password } = this.form.value;
-    console.log('Login submit:', email, password);
 
-    // Next step: call AuthService.login(...)
+    this.authService.login(email!, password!).subscribe({
+      next: () => {
+        this.authService.setLoggedIn(true);
+        this.router.navigate(['/dashboard']);
+      },
+      error: () => {
+        this.error = 'Invalid email or password';
+      },
+    });
   }
 }
