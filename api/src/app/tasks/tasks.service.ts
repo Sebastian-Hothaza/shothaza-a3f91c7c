@@ -5,6 +5,8 @@ import { Task } from './task.entity';
 import { Organization } from '../organizations/organization.entity';
 import { JwtUser } from '../auth/jwt-user.interface';
 import { OrganizationService } from '../organizations/organization.service';
+import { LogService } from '../logs/log.service';
+
 
 
 @Injectable()
@@ -15,6 +17,8 @@ export class TasksService {
         @InjectRepository(Organization)
         private orgRepo: Repository<Organization>,
         private organizationsService: OrganizationService,
+
+        private readonly logService: LogService,
     ) { }
 
     async create(title: string, category: string, organizationId: number, user: JwtUser) {
@@ -40,7 +44,12 @@ export class TasksService {
             organization: org, // <-- assign the entity, not the ID
         });
 
-        return this.repo.save(task);
+        const savedTask = await this.repo.save(task);
+        // Logging
+        await this.logService.create(
+            `Task "${savedTask.title}" created by user ${user.id} in organization ${savedTask.organization.id}`,
+        );
+        return savedTask;
     }
 
     async update(id: number, updateTaskDto: Partial<Task>, user: JwtUser) {
@@ -57,7 +66,13 @@ export class TasksService {
         }
 
         // Update the task
-        return this.repo.update(id, updateTaskDto);
+        const updatedTask = await this.repo.update(id, updateTaskDto)
+        // Logging
+        await this.logService.create(
+            `Task "${id}" updated by user ${user.id}`,
+        );
+
+        return updatedTask;
     }
 
 
@@ -72,7 +87,12 @@ export class TasksService {
         return this.repo.find({ where: { organization: In([...orgIds]) } });
     }
 
-    delete(id: number) {
-        return this.repo.delete(id);
+    async delete(id: number, user: JwtUser) {
+        const deletedTask = await this.repo.delete(id);
+        // Logging
+        await this.logService.create(
+            `Task "${id}" deleted by user ${user.id}`,
+        );
+        return deletedTask;
     }
 }

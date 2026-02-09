@@ -38,7 +38,7 @@ export class TasksController {
     // Only owner can do this
     @Delete(':id')
     @Roles(Role.OWNER)
-    delete(@Param('id') id: string) {
-        return this.tasksService.delete(Number(id));
+    delete(@Param('id') id: string, @Req() req: Request & { user?: any }) {
+        return this.tasksService.delete(Number(id), req.user);
     }
 }
