@@ -14,7 +14,7 @@ export class LogController {
 
   
   @Get()
-  @Roles(Role.OWNER)
+  @Roles(Role.ADMIN)
   async findAll(): Promise<Log[]> {
     return this.logsService.findAll();
   }
