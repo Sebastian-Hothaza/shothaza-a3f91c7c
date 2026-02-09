@@ -49,8 +49,10 @@ interface Task {
                       <input
                         type="checkbox"
                         [checked]="task.completed"
+                        (change)="toggleCompleted(task)"
                         class="h-4 w-4"
                       />
+
 
                       <span
                         [ngClass]="{
@@ -118,8 +120,35 @@ export class DashboardComponent {
     return Object.entries(groups);
   });
 
-  logout(){
-      this.authService.logout().subscribe();
+  toggleCompleted(task: Task) {
+    const updated = { ...task, completed: !task.completed };
+
+    // optimistic update
+    this.tasks.set(
+      this.tasks().map(t =>
+        t.id === task.id ? updated : t
+      ),
+    );
+
+    this.http
+      .put(`${this.API_URL}/${task.id}`, { completed: updated.completed }, {
+        withCredentials: true,
+      })
+      .subscribe({
+        error: () => {
+          // rollback on failure
+          this.tasks.set(
+            this.tasks().map(t =>
+              t.id === task.id ? task : t
+            ),
+          );
+        },
+      });
+  }
+
+
+  logout() {
+    this.authService.logout().subscribe();
   }
 
   constructor() {
