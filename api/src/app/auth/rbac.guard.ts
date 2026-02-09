@@ -48,8 +48,26 @@ export class RbacGuard implements CanActivate {
             if (!task) throw new ForbiddenException('Task not found');
             organizationId = task.organization.id;
         } else {
+            // No org context: enforce role globally (any membership)
+            const highestRole = user.memberships.reduce<Role | null>(
+                (acc, m) =>
+                    !acc || RoleRank[m.role] > RoleRank[acc] ? m.role : acc,
+                null,
+            );
+
+            if (!highestRole) throw new ForbiddenException('No roles found');
+
+
+            const allowed = requiredRoles.some(
+                (requiredRole) =>
+                    RoleRank[highestRole] >= RoleRank[requiredRole],
+            );
+
+            if (!allowed) throw new ForbiddenException('Insufficient role');
+
             return true;
         }
+
 
 
 
