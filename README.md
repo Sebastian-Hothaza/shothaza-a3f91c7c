@@ -4,6 +4,8 @@ This project is a full-stack, task management system built using an NX monorepo.
 It demonstrates authentication, role-based access control (RBAC), organizational hierarchy, and secure API design.  
 It features a simple UI for task CRUD support.
 
+[Demo Video](https://youtu.be/_2Gt5aaMSEQ)
+
 ---
 
 ## Setup Instructions
