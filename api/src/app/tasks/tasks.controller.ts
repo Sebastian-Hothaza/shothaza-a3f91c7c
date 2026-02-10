@@ -33,7 +33,9 @@ export class TasksController {
     @Put(':id')
     @Roles(Role.ADMIN)
     update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto, @Req() req: Request & { user?: any }) {
-        return this.tasksService.update(Number(id), updateTaskDto, req.user);
+        const orgId = req.user.memberships?.[0]?.organizationId;
+        if (!orgId) { throw new ForbiddenException('User has no organization'); }
+        return this.tasksService.update(Number(id), updateTaskDto, orgId, req.user);
     }
 
     // Only owner can do this

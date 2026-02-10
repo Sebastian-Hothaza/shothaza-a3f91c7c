@@ -52,7 +52,7 @@ export class TasksService {
         return savedTask;
     }
 
-    async update(id: number, updateTaskDto: Partial<Task>, user: JwtUser) {
+    async update(id: number, updateTaskDto: Partial<Task>, orgId: number, user: JwtUser) {
         // Build a set of org IDs the user can access for editing
         const accessibleOrgIds = new Set<number>();
         for (const membership of user.memberships) {
@@ -61,7 +61,7 @@ export class TasksService {
         }
 
         // Check if user is allowed to create in this org
-        if (!accessibleOrgIds.has(id)) {
+        if (!accessibleOrgIds.has(orgId)) {
             throw new ForbiddenException('You do not have permission to edit a task in this organization');
         }
 
