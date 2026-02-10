@@ -14,6 +14,7 @@ It features a simple UI for task CRUD support.
 - npm
 - Docker + Docker Compose
 - NX CLI (optional)
+- After cloning the repo, install dependencies with `npm i`
 
 ---
 
