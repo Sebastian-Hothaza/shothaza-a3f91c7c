@@ -31,66 +31,92 @@ async function seed() {
   const taskRepo = AppDataSource.getRepository(Task);
 
   // Orgs
-  const parentOrg = orgRepo.create({ name: 'Parent Org' });
-  await orgRepo.save(parentOrg);
+  const apple = await orgRepo.save(
+    orgRepo.create({ name: 'Apple Inc.' }),
+  );
 
-  const childOrg = orgRepo.create({
-    name: 'Child Org',
-    parent: parentOrg,
-  });
-  await orgRepo.save(childOrg);
+  const marketing = await orgRepo.save(
+    orgRepo.create({ name: 'Marketing', parent: apple }),
+  );
 
   // Users
-  const passwordHash = await bcrypt.hash('password123', 10);
-  const alice = userRepo.create({
+  // Users (Apple)
+   const passwordHash = await bcrypt.hash('password123', 10);
+  const alice = await userRepo.save(userRepo.create({
     name: 'Alice',
-    email: 'alice@gmail.com',
+    email: 'alice@apple.com',
     passwordHash,
-  });
-  await userRepo.save(alice);
+  }));
 
-  const bob = userRepo.create({
-    name: 'Bob',
-    email: 'bob@gmail.com',
+  const andrew = await userRepo.save(userRepo.create({
+    name: 'Andrew',
+    email: 'andrew@apple.com',
     passwordHash,
-  });
-  await userRepo.save(bob);
+  }));
 
-  const outsider = userRepo.create({
-    name: 'outsider',
-    email: 'outsider@gmail.com',
+  const amy = await userRepo.save(userRepo.create({
+    name: 'Amy',
+    email: 'amy@apple.com',
     passwordHash,
-  });
-  await userRepo.save(outsider);
+  }));
+
+  // Users (Marketing)
+  const mark = await userRepo.save(userRepo.create({
+    name: 'Mark',
+    email: 'mark@marketing.com',
+    passwordHash,
+  }));
+
+  const mary = await userRepo.save(userRepo.create({
+    name: 'Mary',
+    email: 'mary@marketing.com',
+    passwordHash,
+  }));
+
+  const michael = await userRepo.save(userRepo.create({
+    name: 'Michael',
+    email: 'michael@marketing.com',
+    passwordHash,
+  }));
 
   // Memberships
   await uoRepo.save([
-    uoRepo.create({
-      user: alice,
-      organization: parentOrg,
-      role: Role.OWNER,
-    }),
-    uoRepo.create({
-      user: bob,
-      organization: childOrg,
-      role: Role.VIEWER,
-    }),
+    { user: alice, organization: apple, role: Role.OWNER },
+    { user: andrew, organization: apple, role: Role.ADMIN },
+    { user: amy, organization: apple, role: Role.VIEWER },
+
+    { user: mark, organization: marketing, role: Role.OWNER },
+    { user: mary, organization: marketing, role: Role.ADMIN },
+    { user: michael, organization: marketing, role: Role.VIEWER },
   ]);
 
-  // Create tasks
-  const task1 = taskRepo.create({
-    title: 'Sample Task 1',
-    category: 'Work',
-    organization: parentOrg, // must link to org
-  });
-  await taskRepo.save(task1);
+  // Categories
+  const categories = [
+    '2026 Q1',
+    'Meeting Info',
+    'Shareholder Tasks',
+    'Internal Tasks',
+    'Other',
+  ];
 
-  const task2 = taskRepo.create({
-    title: 'Sample Task 2',
-    category: 'Personal',
-    organization: childOrg,
-  });
-  await taskRepo.save(task2);
+  // Helper
+  function createTasks(company: string, org: Organization) {
+    return categories.flatMap((category, i) =>
+      Array.from({ length: 2 }, (_, n) =>
+        taskRepo.create({
+          title: `${company} - ${category} Sample Task ${n + 1}`,
+          category,
+          organization: org,
+        }),
+      ),
+    );
+  }
+
+  // Create tasks
+  await taskRepo.save([
+    ...createTasks('Apple Inc', apple),
+    ...createTasks('Marketing', marketing),
+  ]);
 
   console.log('data inserted');
   process.exit(0);
