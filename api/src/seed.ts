@@ -44,38 +44,38 @@ async function seed() {
    const passwordHash = await bcrypt.hash('password123', 10);
   const alice = await userRepo.save(userRepo.create({
     name: 'Alice',
-    email: 'alice@apple.com',
+    email: 'alice@owner.com',
     passwordHash,
   }));
 
   const andrew = await userRepo.save(userRepo.create({
     name: 'Andrew',
-    email: 'andrew@apple.com',
+    email: 'andrew@admin.com',
     passwordHash,
   }));
 
   const amy = await userRepo.save(userRepo.create({
     name: 'Amy',
-    email: 'amy@apple.com',
+    email: 'amy@viewer.com',
     passwordHash,
   }));
 
   // Users (Marketing)
   const mark = await userRepo.save(userRepo.create({
     name: 'Mark',
-    email: 'mark@marketing.com',
+    email: 'mark@owner.com',
     passwordHash,
   }));
 
   const mary = await userRepo.save(userRepo.create({
     name: 'Mary',
-    email: 'mary@marketing.com',
+    email: 'mary@admin.com',
     passwordHash,
   }));
 
   const michael = await userRepo.save(userRepo.create({
     name: 'Michael',
-    email: 'michael@marketing.com',
+    email: 'michael@viewer.com',
     passwordHash,
   }));
 
