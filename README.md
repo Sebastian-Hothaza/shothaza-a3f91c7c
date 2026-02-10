@@ -31,7 +31,8 @@ Insert sample data with `npx nx seed api`
 
 ## BackEnd Setup (NestJS)
 
-For simplicity, we have ommited the use of .env files. CORS has also been set up without restriction.
+For simplicity and ease of setup, environment variables are configured directly in code rather than via `.env` files. CORS has also been configured without restriction for development purposes.
+
 
 At the **root of the repository**, run
 
@@ -39,7 +40,7 @@ At the **root of the repository**, run
 
 The API will be accessible at `http://localhost:3001/api`
 
-## FrontEnd Setup (AngularJS)
+## FrontEnd Setup (Angular V21)
 
 Front end consists of a simple dashboard UI featuring a login page and task view page which allows CRUD operations on tasks.
 
@@ -146,7 +147,7 @@ Submit a `GET` request to `/api/tasks` with jwt attached
 Submit a `POST` request to `/api/tasks/:id` with jwt attached
 
 *Delete a task*  
-Submit a `GET` request to `/api/tasks/:id` with jwt attached
+Submit a `DELETE` request to `/api/tasks/:id` with jwt attached
 
 **Logs**
 
