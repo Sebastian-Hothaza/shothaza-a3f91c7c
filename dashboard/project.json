@@ -16,11 +16,17 @@
         "browser": "dashboard/src/main.ts",
         "tsConfig": "dashboard/tsconfig.app.json",
         "assets": [
-          {
-            "glob": "**/*",
-            "input": "dashboard/public"
-          }
-        ],
+  {
+    "glob": "**/*",
+    "input": "dashboard/public",
+    "output": "/"
+  },
+  {
+    "glob": "**/*",
+    "input": "dashboard/src/assets",
+    "output": "assets"
+  }
+],
         "styles": [
           "dashboard/src/styles.css"
         ]

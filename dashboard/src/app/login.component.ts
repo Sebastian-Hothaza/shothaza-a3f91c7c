@@ -9,53 +9,56 @@ import { AuthService } from './auth';
   selector: 'app-login',
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="w-full max-w-md bg-white p-8 rounded-lg shadow">
-      <h1 class="text-2xl font-bold mb-6 text-center">
-        Task Dashboard Login
-      </h1>
+  <div 
+  class="min-h-screen flex items-center justify-center bg-cover bg-center"
+  style="background-image: url('assets/bg.jpg')"
+>
+  <div class="w-full max-w-md bg-white p-8 rounded-lg shadow backdrop-blur-sm bg-opacity-70">
+    <h1 class="text-2xl font-bold mb-6 text-center">
+      Task Dashboard Login
+    </h1>
 
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
-            type="email"
-            formControlName="email"
-            class="mt-1 w-full rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
-            placeholder="you@example.com"
-          />
-        </div>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">
+          Email
+        </label>
+        <input
+          type="email"
+          formControlName="email"
+          class="mt-1 w-full rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
+          placeholder="you@example.com"
+        />
+      </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
-            type="password"
-            formControlName="password"
-            class="mt-1 w-full rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
-            placeholder="password"
-          />
-        </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">
+          Password
+        </label>
+        <input
+          type="password"
+          formControlName="password"
+          class="mt-1 w-full rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
+          placeholder="password"
+        />
+      </div>
 
-        <div *ngIf="error" class="text-red-600 text-sm">
-          {{ error }}
-        </div>
+      <div *ngIf="error" class="text-red-600 text-sm">
+        {{ error }}
+      </div>
 
-
-        <button
-          type="submit"
-          [disabled]="form.invalid"
-          class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          Log in
-        </button>
-      </form>
-    </div>
+      <button
+        type="submit"
+        [disabled]="form.invalid"
+        class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+      >
+        Log in
+      </button>
+    </form>
   </div>
-`,
+</div>
+
+  `,
 
 })
 export class LoginComponent {
