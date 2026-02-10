@@ -4,6 +4,7 @@ import { TasksService } from './tasks.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RbacGuard } from '../auth/rbac.guard';
 import { UpdateTaskDto } from './task-update.dto';
+import { Organization } from '../organizations/organization.entity';
 
 
 describe('TasksController', () => {
@@ -55,22 +56,22 @@ describe('TasksController', () => {
 
   describe('create', () => {
     it('should call service.create with correct arguments', async () => {
-      const user = { id: 1, memberships: [] };
+      const user = { id: 1, memberships: [ {organizationId: 1, role: 'ADMIN'} ] };
       const req: any = { user };
-      const dto = { title: 'New Task', category: 'Work', organizationId: 1 };
+      const dto = { title: 'New Task', category: 'Work' };
       const createdTask = { id: 1, ...dto, completed: false, organization: { id: 1, name: 'Org 1', children: [], tasks: [] } };
 
       mockTasksService.create.mockResolvedValue(createdTask);
 
-      const result = await controller.create(dto.title, dto.category, dto.organizationId, req);
+      const result = await controller.create(dto.title, dto.category,  req);
       expect(result).toBe(createdTask);
-      expect(mockTasksService.create).toHaveBeenCalledWith(dto.title, dto.category, dto.organizationId, user);
+      expect(mockTasksService.create).toHaveBeenCalledWith(dto.title, dto.category, 1, user);
     });
   });
 
   describe('update', () => {
     it('should call service.update with correct arguments', async () => {
-      const user = { id: 1, memberships: [] };
+      const user = { id: 1, memberships: [{organizationId: 1, role: 'ADMIN'}] };
       const req: any = { user };
       const dto: UpdateTaskDto = { title: 'Updated Task', category: 'Personal' };
       const updatedTask = { id: 1, ...dto, completed: false, organization: { id: 1, name: 'Org 1', children: [], tasks: [] } };
@@ -79,7 +80,7 @@ describe('TasksController', () => {
 
       const result = await controller.update('1', dto, req);
       expect(result).toBe(updatedTask);
-      expect(mockTasksService.update).toHaveBeenCalledWith(1, dto, user);
+      expect(mockTasksService.update).toHaveBeenCalledWith(1, dto, 1, user);
     });
   });
 

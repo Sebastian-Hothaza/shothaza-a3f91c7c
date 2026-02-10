@@ -100,7 +100,7 @@ describe('TasksService', () => {
       orgService.getOrgAndDescendants.mockResolvedValue([1]);
       taskRepo.update.mockResolvedValue({ affected: 1 });
 
-      const result = await service.update(1, { title: 'Updated' }, user);
+      const result = await service.update(1, { title: 'Updated' }, 1, user);
       expect(result).toEqual({ affected: 1 });
       expect(taskRepo.update).toHaveBeenCalledWith(1, { title: 'Updated' });
     });
@@ -109,7 +109,7 @@ describe('TasksService', () => {
       const user: JwtUser = { id: 1, memberships: [{ organizationId: 2, role: Role.ADMIN }] };
       orgService.getOrgAndDescendants.mockResolvedValue([2]);
 
-      await expect(service.update(1, { title: 'Updated' }, user)).rejects.toThrow(ForbiddenException);
+      await expect(service.update(1, { title: 'Updated' }, 1, user)).rejects.toThrow(ForbiddenException);
     });
   });
 
