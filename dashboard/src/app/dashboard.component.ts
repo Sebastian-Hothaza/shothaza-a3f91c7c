@@ -197,7 +197,7 @@ interface Task {
 export class DashboardComponent {
   private http = inject(HttpClient);
 
-  private API_URL = "http://10.0.0.4:3001/api/tasks";
+  private API_URL = "http://localhost:3001/api/tasks";
   private authService = inject(AuthService);
 
   showCreateModal = signal(false); // Toggle modal to create new tasks

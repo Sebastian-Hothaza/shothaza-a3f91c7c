@@ -9,7 +9,7 @@ import { tap, catchError } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly API_URL = 'http://10.0.0.4:3001/api/auth';
+  private readonly API_URL = 'http://localhost:3001/api/auth';
 
   // Tracks login state across the app
   private loggedIn$ = new BehaviorSubject<boolean>(false);
